@@ -16,7 +16,7 @@ CREATE TABLE user_list (
     user_id INT AUTO_INCREMENT,
     name VARCHAR(20),
     email VARCHAR(20),
-    password VARCHAR(20),
+    password VARCHAR(200),
     PRIMARY KEY(user_id)
 );
 ```
