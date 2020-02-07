@@ -2,6 +2,7 @@
 
 MySQL DB configuration
 
+```
 CREATE TABLE todo_list (
     task_id INT AUTO_INCREMENT,
     task VARCHAR(20),
@@ -18,3 +19,4 @@ CREATE TABLE user_list (
     password VARCHAR(20),
     PRIMARY KEY(user_id)
 );
+```
