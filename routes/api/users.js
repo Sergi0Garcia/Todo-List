@@ -1,22 +1,29 @@
-//Routes for users
+const express = require('express');
 
-const express = require("express");
 const router = express.Router();
-const mysql = require("mysql2/promise");
-const pool = require("../../config/keys");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+// const mysql = require('mysql2/promise');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
-router.post("/", async (req, res) => {
+const pool = require('../../config/keys');
+
+/**
+ * QUERY to register user to DB and checking if the user entered all fields
+ * @route POST /api/users/
+ * @access Public
+ * @params name, email, password
+ */
+
+router.post('/', async (req, res) => {
   const query = `INSERT INTO user_list SET ?`;
   const { name, email, password } = req.body;
 
-  //Simple Validation
+  // Simple Validation
   if (!name || !email || !password) {
-    return res.status(400).json({ msg: "Please enter all fields" });
+    return res.status(400).json({ msg: 'Please enter all fields' });
   }
 
-  //Create salt & hash
+  // Create salt & hash
   try {
     const hashpassword = await bcrypt.hash(password, 10);
     const [queryResult] = await pool.query(query, {
@@ -30,7 +37,7 @@ router.post("/", async (req, res) => {
         name,
         email
       },
-      "Secret",
+      'Secret',
       { expiresIn: 3600 },
       (err, token) => {
         if (err) throw err;
@@ -47,7 +54,7 @@ router.post("/", async (req, res) => {
     );
   } catch (e) {
     console.log(e);
-    return res.send("Error fetching data");
+    return res.send('Error fetching data');
   }
 });
 

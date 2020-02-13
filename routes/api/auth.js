@@ -1,40 +1,43 @@
-//Routes for authentification
-//Auth for users
+const express = require('express');
 
-const express = require("express");
 const router = express.Router();
-const mysql = require("mysql2/promise");
-const pool = require("../../config/keys");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const auth = require("../../middleware/auth");
+// const mysql = require('mysql2/promise');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const pool = require('../../config/keys');
 
-//Route /api/auth
+const auth = require('../../middleware/auth');
 
-router.post("/", async (req, res) => {
+/**
+ * This route validates if user enters all fields, if the user exists in the DB and validates a Password
+ * @route POST api/auth
+ * @access Public
+ * @params email, password
+ */
+
+router.post('/', async (req, res) => {
   const { email, password } = req.body;
 
-  //Simple Validation
+  // Simple Validation
   if (!email || !password) {
-    return res.status(400).json({ msg: "Please enter all fields" });
+    return res.status(400).json({ msg: 'Please enter all fields' });
   }
 
   try {
     const query1 = `SELECT * FROM user_list where email="${email}"`;
     const [response1] = await pool.query(query1);
 
-    //Check for existing user
+    // Check for existing user
     if (response1.length === 0) {
-      return res.status(400).json({ msg: "User does not exist" });
+      return res.status(400).json({ msg: 'User does not exist' });
     }
-
     const user1 = response1[0];
     const user_id = response1[0].user_id;
     const name = response1[0].name;
 
-    //Validate password
+    // Validate password
     const match = await bcrypt.compare(password, user1.password);
-    if (!match) return res.status(400).json({ msg: "Invalid Credentials" });
+    if (!match) return res.status(400).json({ msg: 'Invalid Credentials' });
 
     jwt.sign(
       {
@@ -42,7 +45,7 @@ router.post("/", async (req, res) => {
         name,
         email
       },
-      "Secret",
+      'Secret',
       { expiresIn: 3600 },
       (err, token) => {
         const info = {
@@ -59,14 +62,18 @@ router.post("/", async (req, res) => {
     );
   } catch (e) {
     console.log(e);
-    return res.send("Error fetching data");
+    return res.send('Error fetching data');
   }
 });
 
-//Get query to authenticate user
-//Private Route
+/**
+ * QUERT to authentificate user
+ * @route api/auth/user
+ * @access Private
+ * @params user ID
+ */
 
-router.get("/user", auth, async (req, res) => {
+router.get('/user', auth, async (req, res) => {
   const query = `SELECT user_id, name, email FROM user_list WHERE user_id = ${req.user.id};`;
   try {
     const [response] = await pool.query(query);
@@ -79,7 +86,7 @@ router.get("/user", auth, async (req, res) => {
     return res.json(user);
   } catch (e) {
     console.log(e);
-    return res.send("Error AUTHENTIFICATING");
+    return res.send('Error AUTHENTIFICATING');
   }
 });
 
